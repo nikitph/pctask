@@ -4,7 +4,7 @@ from scrapy.spiders import CrawlSpider, Rule
 from bs4 import BeautifulSoup
 
 
-from ..items import CyclonescrapeItem, CyclonescrapeForecastItem
+from ..items import CycloneTrackHistoryItem, CycloneForecastHistoryItem
 
 
 class CycloneSpider(CrawlSpider):
@@ -18,30 +18,34 @@ class CycloneSpider(CrawlSpider):
     )
 
     def parse_item(self, response):
-        i = {}
-        item = CyclonescrapeItem()
+        item = CycloneTrackHistoryItem()
         item['storm_identifier'] = response.url.split('=')[-1]
+        item['storm_name'] = \
+            response.css('body:nth-child(2) div:nth-child(1) > h2:nth-child(2)::text').extract()[0].split('- ')[-1]
+
         print('Parse :' + response.url.split('=')[-1])
         tabl = response.css('body > div > div > div.text_product_wrapper > table').extract()[1]
-        table_data = [[cell.text for cell in row("td")]
-                      for row in BeautifulSoup(tabl)("tr")]
-        item['track_history'] = table_data
-        item['forecast_history'] = ''
-        print(table_data)
-        return item
+        for row in BeautifulSoup(tabl)("tr"):
+            if row("td")[0].text == "Synoptic Time":
+                continue
+            item['synoptic_time'] = row("td")[0].text
+            item['latitude'] = row("td")[1].text
+            item['longitude'] = row("td")[2].text
+            item['intensity'] = row("td")[3].text
+            yield item
 
     def parse_item_2(self, response):
-        i = {}
-        item = CyclonescrapeForecastItem()
+        item = CycloneForecastHistoryItem()
         item['storm_identifier'] = response.url.split('=')[-1]
         print('Parse :' + response.url.split('=')[-1])
-        h4d={}
-        print(len(response.css('body > div > div > h4::text').extract()))
         for i in range(len(response.css('body > div > div > h4::text').extract())):
+            item['time_of_forecast'] = response.css('body > div > div > h4::text').extract()[i].split(': ')[-1]
             tabl = response.css('body > div > div > table').extract()[i]
-            table_data = [[cell.text for cell in row("td")]
-                            for row in BeautifulSoup(tabl)("tr")]
-            h4d[response.css('body > div > div > h4::text').extract()[i]] = table_data
-        item['forecast_history'] = str(h4d)
-        item['track_history'] = ''
-        return item
+            for row in BeautifulSoup(tabl)("tr"):
+                if row("td")[0].text == "Forecast Hour":
+                    continue
+                item['forecast_hour'] = row("td")[0].text
+                item['latitude'] = row("td")[1].text
+                item['longitude'] = row("td")[2].text
+                item['intensity'] = row("td")[3].text
+                yield item

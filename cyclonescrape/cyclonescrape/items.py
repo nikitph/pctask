@@ -8,15 +8,21 @@
 import scrapy
 
 
-class CyclonescrapeItem(scrapy.Item):
+class CycloneTrackHistoryItem(scrapy.Item):
     # define the fields for your item here like:
     storm_identifier = scrapy.Field()
-    track_history = scrapy.Field()
-    forecast_history = scrapy.Field()
+    storm_name = scrapy.Field()
+    synoptic_time = scrapy.Field()
+    latitude = scrapy.Field()
+    longitude = scrapy.Field()
+    intensity = scrapy.Field()
 
 
-class CyclonescrapeForecastItem(scrapy.Item):
+class CycloneForecastHistoryItem(scrapy.Item):
     # define the fields for your item here like:
     storm_identifier = scrapy.Field()
-    forecast_history = scrapy.Field()
-    track_history = scrapy.Field()
+    time_of_forecast = scrapy.Field()
+    forecast_hour = scrapy.Field()
+    latitude = scrapy.Field()
+    longitude = scrapy.Field()
+    intensity = scrapy.Field()
