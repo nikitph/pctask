@@ -6,12 +6,13 @@
 # See: https://doc.scrapy.org/en/latest/topics/item-pipeline.html
 import psycopg2
 from .items import CycloneTrackHistoryItem, CycloneForecastHistoryItem
+import os
 
 
 class CyclonescrapePipeline(object):
     def open_spider(self, spider):
-        hostname = 'localhost'
-        username = 'cycloneuser'
+        hostname = os.getenv('DB_HOST')
+        username = 'postgres'
         password = 'abc'  # your password
         database = 'cyclonedata'
         self.connection = psycopg2.connect(host=hostname, user=username, password=password, dbname=database)
@@ -28,6 +29,7 @@ class CyclonescrapePipeline(object):
             self.cur.execute("INSERT INTO cyclone_info(storm_identifier, storm_name)"
                              " VALUES (%s,%s) ON CONFLICT (storm_identifier) DO NOTHING;",
                              (item['storm_identifier'], item['storm_name']))
+            self.connection.commit()
 
         if isinstance(item, CycloneForecastHistoryItem):
             self.cur.execute("INSERT INTO cyclone_forecast_history(storm_identifier, time_of_forecast, forecast_hour,"
@@ -35,10 +37,14 @@ class CyclonescrapePipeline(object):
                              (item['storm_identifier'], item['time_of_forecast'], item['forecast_hour'],
                               item['latitude'],
                               item['longitude'], item['intensity']))
+            self.connection.commit()
+
         else:
             self.cur.execute("INSERT INTO cyclone_track_history(storm_identifier, synoptic_time,"
                              "latitude, longitude, intensity) VALUES (%s, %s, %s, %s, %s);",
                              (item['storm_identifier'], item['synoptic_time'],
                               item['latitude'], item['longitude'], item['intensity']))
+            self.connection.commit()
+
         self.connection.commit()
         return item

@@ -2,7 +2,7 @@ version: '2.1'
 services:
   PostgreSQL:
     restart: always
-    image: nikitph/docker-postgresql:latest
+    image: nikitph/portcastdbimage:latest
     ports:
       - "5432:5432"
     environment:
@@ -15,7 +15,12 @@ services:
 
   scraper:
     build: .
+    restart: always
+    links:
+      - PostgreSQL
+    environment:
+      - DB_HOST=PostgreSQL
     depends_on:
       PostgreSQL:
         condition: service_healthy
-    command: [ "python3", "./cyclonescrape/datacheck.py && ./cycloneprocess.py"]
+    command: [ "python3", "./cycloneprocess.py" ]
