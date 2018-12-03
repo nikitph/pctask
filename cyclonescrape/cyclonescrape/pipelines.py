@@ -11,11 +11,11 @@ import os
 
 class CyclonescrapePipeline(object):
     def open_spider(self, spider):
-        hostname = os.getenv('DB_HOST')
         username = 'postgres'
         password = 'abc'  # your password
         database = 'cyclonedata'
-        self.connection = psycopg2.connect(host=hostname, user=username, password=password, dbname=database)
+        print(os.environ)
+        self.connection = psycopg2.connect(host='db', user=username, password=password, dbname=database)
         self.connection.autocommit = True
         self.cur = self.connection.cursor()
 
@@ -25,6 +25,7 @@ class CyclonescrapePipeline(object):
 
     def process_item(self, item, spider):
         print(str(type(item)))
+        print(os.environ)
         if isinstance(item, CycloneTrackHistoryItem):
             self.cur.execute("INSERT INTO cyclone_info(storm_identifier, storm_name)"
                              " VALUES (%s,%s) ON CONFLICT (storm_identifier) DO NOTHING;",

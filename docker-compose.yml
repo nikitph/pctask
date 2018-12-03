@@ -1,12 +1,12 @@
 version: '2.1'
 services:
-  PostgreSQL:
+  db:
     restart: always
     image: nikitph/portcastdbimage:latest
     ports:
       - "5432:5432"
     environment:
-      - DEBUG=false
+      - DEBUG = false
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres"]
       interval: 5s
@@ -15,12 +15,12 @@ services:
 
   scraper:
     build: .
-    restart: always
     links:
-      - PostgreSQL
+      - db
     environment:
-      - DB_HOST=PostgreSQL
+      - DB_HOST = db
+      - BAR = FOO
     depends_on:
-      PostgreSQL:
+      db:
         condition: service_healthy
-    command: [ "python3", "./cycloneprocess.py" ]
+    command: [sh, -c, "cd ./cyclonescrape && scrapy crawl cyclone && sleep infinity"]

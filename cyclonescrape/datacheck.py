@@ -1,7 +1,7 @@
 import psycopg2
 import os
 
-hostname = os.getenv('PostgreSQL')
+hostname = os.getenv('HOSTNAME')
 username = 'postgres'
 password = 'abc'
 database = 'cyclonedata'
@@ -49,7 +49,7 @@ ALTER TABLE "cyclone_track_history" ADD CONSTRAINT "cyclone_track_history_fk0" F
     conn.commit()
 
 
-print(os.getenv('DB_HOST'))
+print(os.environ)
 conn = psycopg2.connect(host=hostname, user=username, password=password, dbname=database)
 conn.autocommit = True
 builtables(conn)

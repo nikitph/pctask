@@ -2,6 +2,7 @@
 from scrapy.linkextractors import LinkExtractor
 from scrapy.spiders import CrawlSpider, Rule
 from bs4 import BeautifulSoup
+import os
 
 
 from ..items import CycloneTrackHistoryItem, CycloneForecastHistoryItem
@@ -32,12 +33,12 @@ class CycloneSpider(CrawlSpider):
             item['latitude'] = row("td")[1].text
             item['longitude'] = row("td")[2].text
             item['intensity'] = row("td")[3].text
+            print(os.environ)
             yield item
 
     def parse_item_2(self, response):
         item = CycloneForecastHistoryItem()
         item['storm_identifier'] = response.url.split('=')[-1]
-        print('Parse :' + response.url.split('=')[-1])
         for i in range(len(response.css('body > div > div > h4::text').extract())):
             item['time_of_forecast'] = response.css('body > div > div > h4::text').extract()[i].split(': ')[-1]
             tabl = response.css('body > div > div > table').extract()[i]

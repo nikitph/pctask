@@ -33,7 +33,7 @@ class CyclonescrapeSpiderMiddleware(object):
 
         # Must return an iterable of Request, dict or Item objects.
         for i in result:
-            print(i)
+            yield(i)
 
     def process_spider_exception(self, response, exception, spider):
         # Called when a spider or process_spider_input() method
